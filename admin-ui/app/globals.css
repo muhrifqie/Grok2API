@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tema WaroengPay — disalin dari Waroengkuy Admin (Shopeeboost V4 NextJS globals.css [data-wp]).
+   Token sama persis: bg-bg, bg-surface, bg-surface-2, border-border(-subtle), text-text-main/muted/subtle,
+   text-success/warning/danger/info, primary. */
+@theme inline {
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --color-bg: var(--background);
+  --color-surface: var(--card);
+  --color-surface-2: var(--sb-surface-2);
+  --color-surface-3: var(--sb-surface-3);
+  --color-border: var(--border);
+  --color-border-subtle: var(--sb-border-subtle);
+  --color-text-main: var(--foreground);
+  --color-text-muted: var(--muted-foreground);
+  --color-text-subtle: var(--sb-text-subtle);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-brand-600: var(--brand-600);
+  --color-success: var(--sb-success);
+  --color-warning: var(--sb-warning);
+  --color-danger: var(--sb-danger);
+  --color-info: var(--sb-info);
+  --shadow-elevated: var(--sb-shadow-elevated);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Palet monokrom ala Grok (grok.com): hitam/putih netral tanpa rona biru. Aksen = warna teks (putih di gelap,
+   hitam di terang). Hijau/kuning/merah sengaja dipertahankan tapi diredam — hanya utk status (valid/error). */
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --primary: #0a0a0a;
+  --primary-foreground: #ffffff;
+  --brand-600: #2b2b2b;
+  --muted-foreground: #5c5c5c;
+  --border: #e2e2e2;
+  --sb-surface-2: #f4f4f4;
+  --sb-surface-3: #e9e9e9;
+  --sb-border-subtle: #ececec;
+  --sb-text-subtle: #8f8f8f;
+  --sb-success: #1f7a44;
+  --sb-warning: #8a5a00;
+  --sb-danger: #b3261e;
+  --sb-info: #0a0a0a;
+  --sb-shadow-elevated: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+  color-scheme: light;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #fafafa;
+  --card: #0e0e0e;
+  --primary: #fafafa;
+  --primary-foreground: #000000;
+  --brand-600: #d4d4d4;
+  --muted-foreground: #a3a3a3;
+  --border: #262626;
+  --sb-surface-2: #171717;
+  --sb-surface-3: #222222;
+  --sb-border-subtle: #1c1c1c;
+  --sb-text-subtle: #6b6b6b;
+  --sb-success: #6fcf97;
+  --sb-warning: #e0b04a;
+  --sb-danger: #f07167;
+  --sb-info: #fafafa;
+  --sb-shadow-elevated: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Gaya kotak WaroengPay: tanpa sudut membulat — kecuali yg MEMANG bulat (pill, titik status, avatar, lencana). */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+:is(.rounded-full, [data-round]) {
+  border-radius: 9999px !important;
+}
+:is(h1, h2, h3) {
+  letter-spacing: -0.025em;
+}
+::selection {
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+/* Ganti tema = lingkaran menyebar dari tombol → matikan crossfade bawaan. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+
+/* Skeleton shimmer */
+@keyframes sb-shimmer {
+  0% { background-position: 150% 0; }
+  100% { background-position: -150% 0; }
+}
+.sb-shimmer {
+  background-color: var(--sb-surface-2);
+  background-image: linear-gradient(90deg, transparent 20%, var(--sb-surface-3) 50%, transparent 80%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: sb-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(1rem); }
+  to { opacity: 1; transform: none; }
+}
+.toast-in { animation: toast-in 0.2s ease; }
+
+/* ===== Markdown jawaban model (components/markdown.tsx) — monokrom, rapat tapi lega dibaca ===== */
+.md { font-size: 14px; line-height: 1.7; color: var(--foreground); overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md p { margin: 0.6em 0; }
+.md strong { font-weight: 650; }
+.md em { font-style: italic; }
+.md del { opacity: 0.7; }
+.md h1, .md h2, .md h3, .md h4 { font-weight: 700; line-height: 1.3; margin: 1.2em 0 0.5em; }
+.md h1 { font-size: 1.35em; }
+.md h2 { font-size: 1.2em; padding-bottom: 0.3em; border-bottom: 1px solid var(--sb-border-subtle); }
+.md h3 { font-size: 1.05em; }
+.md h4 { font-size: 1em; color: var(--muted-foreground); }
+.md ul, .md ol { margin: 0.6em 0; padding-left: 1.4em; }
+.md ul { list-style: disc; }
+.md ol { list-style: decimal; }
+.md li { margin: 0.25em 0; }
+.md li::marker { color: var(--sb-text-subtle); }
+.md li > p { margin: 0.2em 0; }
+.md input[type="checkbox"] { margin-right: 0.4em; accent-color: var(--primary); }
+.md blockquote { margin: 0.8em 0; padding: 0.2em 0 0.2em 0.9em; border-left: 3px solid var(--border); color: var(--muted-foreground); }
+.md hr { margin: 1.2em 0; border: 0; border-top: 1px solid var(--sb-border-subtle); }
+.md a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--sb-text-subtle); }
+.md a:hover { text-decoration-color: var(--foreground); }
+.md .md-inline { font-family: var(--font-mono); font-size: 0.86em; padding: 0.1em 0.35em; background: var(--sb-surface-2); border: 1px solid var(--sb-border-subtle); }
+.md .md-code { margin: 0.8em 0; border: 1px solid var(--sb-border-subtle); background: var(--background); }
+.md .md-code pre { margin: 0; padding: 0.8em 1em; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; }
+.md .md-table { margin: 0.8em 0; overflow-x: auto; border: 1px solid var(--sb-border-subtle); }
+.md table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.md th { background: var(--sb-surface-2); font-weight: 600; text-align: left; }
+.md th, .md td { padding: 0.45em 0.75em; border-bottom: 1px solid var(--sb-border-subtle); }
+.md tr:last-child td { border-bottom: 0; }
+
+/* kursor ketik saat streaming */
+@keyframes caret-blink { 50% { opacity: 0; } }
+.streaming .md > :last-child::after { content: ""; display: inline-block; width: 0.5em; height: 1.05em; margin-left: 2px; vertical-align: -0.15em; background: var(--foreground); animation: caret-blink 1s steps(1) infinite; }
+
+/* Bottom bar HP ([data-bnav]) → body diberi ruang bawah. */
+@media (max-width: 639.98px) {
+  body:has([data-bnav]) {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+.sidebar-scroll { scrollbar-width: thin; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

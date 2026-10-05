@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grok2API Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#09090b;--surface:#18181b;--surface2:#27272a;--border:#3f3f46;--text:#fafafa;--text2:#a1a1aa;--accent:#1d9bf0;--accent2:#1a8cd8;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh;display:flex}
+a{color:var(--accent);text-decoration:none}
+button{cursor:pointer;font-family:inherit;font-size:13px;border:none;border-radius:6px;padding:6px 14px;transition:all .15s}
+input,textarea{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:inherit;font-size:13px;outline:none;width:100%}
+input:focus,textarea:focus{border-color:var(--accent)}
+
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;display:flex;flex-direction:column}
+.sidebar h1{font-size:15px;padding:0 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.sidebar h1 span{background:var(--accent);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
+.nav{padding:8px;flex:1}
+.nav a{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;color:var(--text2);font-size:13px;font-weight:500;transition:all .15s}
+.nav a:hover,.nav a.active{background:var(--surface2);color:var(--text)}
+.nav a.active{color:var(--accent)}
+.nav a svg{width:16px;height:16px;flex-shrink:0}
+
+.main{flex:1;overflow-y:auto;padding:24px 32px}
+.page{display:none}
+.page.active{display:block}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px}
+.stat .label{font-size:12px;color:var(--text2);margin-bottom:4px}
+.stat .value{font-size:24px;font-weight:700}
+.stat .value.green{color:var(--green)}
+.stat .value.red{color:var(--red)}
+.stat .value.blue{color:var(--accent)}
+
+.toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.toolbar h2{font-size:16px;margin-right:auto}
+
+.btn{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn:hover{background:var(--border)}
+.btn-primary{background:var(--accent);color:#fff;border:1px solid transparent}
+.btn-primary:hover{background:var(--accent2)}
+.btn-danger{background:var(--red);color:#fff;border:1px solid transparent}
+.btn-danger:hover{opacity:.85}
+.btn-sm{padding:4px 10px;font-size:12px}
+
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;background:var(--surface)}
+tr:hover td{background:var(--surface)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-green{background:#16a34a22;color:var(--green)}
+.badge-red{background:#ef444422;color:var(--red)}
+.badge-yellow{background:#eab30822;color:var(--yellow)}
+.badge-blue{background:#1d9bf022;color:var(--accent)}
+.badge-gray{background:var(--surface2);color:var(--text2)}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:480px}
+.modal h3{margin-bottom:16px;font-size:16px}
+.modal .field{margin-bottom:12px}
+.modal .field label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+.mono{font-family:'Cascadia Code',Consolas,monospace;font-size:12px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);padding:12px 20px;border-radius:8px;z-index:200;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+@media(max-width:768px){
+  .sidebar{width:60px}.sidebar h1 span,.nav a span{display:none}.sidebar h1{justify-content:center;padding:0 8px 16px}
+  .main{padding:16px}.stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h1>G2A <span>ADMIN</span></h1>
+  <nav class="nav">
+    <a href="#dashboard" class="active" onclick="showPage('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="#accounts" onclick="showPage('accounts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Akun</span>
+    </a>
+    <a href="#keys" onclick="showPage('keys')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      <span>API Keys</span>
+    </a>
+    <a href="#logs" onclick="showPage('logs')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Logs</span>
+    </a>
+  </nav>
+</div>
+
+<div class="main">
+
+  <!-- Dashboard -->
+  <div id="page-dashboard" class="page active">
+    <div class="toolbar"><h2>Dashboard</h2></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <!-- Accounts -->
+  <div id="page-accounts" class="page">
+    <div class="toolbar">
+      <h2>Akun Grok</h2>
+      <button class="btn" onclick="checkAllAccounts()">Cek Semua</button>
+      <button class="btn" onclick="loginAllAccounts()">Login Semua</button>
+      <button class="btn-primary btn" onclick="openModal('add')">+ Tambah</button>
+      <button class="btn" onclick="openModal('bulk')">Bulk Import</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Email</th><th>Status</th><th>Login</th><th>Request</th><th>Terakhir</th><th>Aksi</th></tr></thead>
+        <tbody id="acc-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- API Keys -->
+  <div id="page-keys" class="page">
+    <div class="toolbar">
+      <h2>API Keys</h2>
+      <button class="btn-primary btn" onclick="openModal('newkey')">+ Buat Key</button>
+    </div>
+    <table>
+      <thead><tr><th>Key</th><th>Nama</th><th>Status</th><th>Request</th><th>Dibuat</th><th>Aksi</th></tr></thead>
+      <tbody id="key-table"></tbody>
+    </table>
+  </div>
+
+  <!-- Logs -->
+  <div id="page-logs" class="page">
+    <div class="toolbar">
+      <h2>Usage Logs</h2>
+      <button class="btn" onclick="loadLogs()">Refresh</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Waktu</th><th>Akun</th><th>Model</th><th>Durasi</th><th>Status</th></tr></thead>
+        <tbody id="log-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modals -->
+<div class="modal-bg" id="modal-add">
+  <div class="modal">
+    <h3>Tambah Akun</h3>
+    <div class="field"><label>Email</label><input id="add-email" placeholder="email@example.com"></div>
+    <div class="field"><label>Password</label><input id="add-pass" type="password" placeholder="password"></div>
+    <div class="actions">
+      <button class="btn" onclick="closeModals()">Batal</button>
+      <button class="btn-primary btn" onclick="addAccount()">Tambah</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-bulk">
+  <div class="modal">
+    <h3>Bulk Import</h3>
+    <div class="field"><label>Format: email:password (satu per baris)</label>
+    <textarea id="bulk-data" rows="8" placeholder="email1@ex.com:pass1&#10;email2@ex.com:pass2"></textarea></div>
+    <div class="actions">
+      <button class="btn" onclick="closeModals()">Batal</button>
+      <button class="btn-primary btn" onclick="bulkImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-newkey">
+  <div class="modal">
+    <h3>Buat API Key</h3>
+    <div class="field"><label>Nama</label><input id="key-name" placeholder="Nama key"></div>
+    <div class="actions">
+      <button class="btn" onclick="closeModals()">Batal</button>
+      <button class="btn-primary btn" onclick="createKey()">Buat</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let pollTimer = null;
+
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav a').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  document.querySelector(`.nav a[href="#${p}"]`).classList.add('active');
+  if (p === 'dashboard') loadStats();
+  if (p === 'accounts') loadAccounts();
+  if (p === 'keys') loadKeys();
+  if (p === 'logs') loadLogs();
+}
+
+function toast(msg) {
+  const d = document.createElement('div');
+  d.className = 'toast';
+  d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3000);
+}
+
+function openModal(id) { document.getElementById('modal-' + id).classList.add('show'); }
+function closeModals() { document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('show')); }
+
+function badge(text, type) { return `<span class="badge badge-${type}">${text}</span>`; }
+
+async function loadStats() {
+  const d = await fetch(API + '/admin/api/stats').then(r => r.json());
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="label">Total Akun</div><div class="value">${d.total}</div></div>
+    <div class="stat"><div class="label">Akun Valid</div><div class="value green">${d.valid}</div></div>
+    <div class="stat"><div class="label">Pool Aktif</div><div class="value blue">${d.pool_size}</div></div>
+    <div class="stat"><div class="label">Total Request</div><div class="value">${d.requests}</div></div>
+    <div class="stat"><div class="label">Request Hari Ini</div><div class="value">${d.today}</div></div>
+    <div class="stat"><div class="label">Error Hari Ini</div><div class="value red">${d.errors_today}</div></div>`;
+}
+
+async function loadAccounts() {
+  const accs = await fetch(API + '/admin/api/accounts').then(r => r.json());
+  const tb = document.getElementById('acc-table');
+  tb.innerHTML = accs.map(a => `<tr>
+    <td class="mono">${a.email}</td>
+    <td>${a.valid ? badge('Valid','green') : badge('Invalid','red')}</td>
+    <td>${loginBadge(a.login_status)}</td>
+    <td>${a.request_count}${a.error_count ? ` <small style="color:var(--red)">(${a.error_count} err)</small>` : ''}</td>
+    <td style="color:var(--text2);font-size:12px">${a.last_used || a.last_verified || '-'}</td>
+    <td>
+      <button class="btn btn-sm" onclick="checkAccount(${a.id})">Cek</button>
+      <button class="btn btn-sm" onclick="loginAccount(${a.id})">Login</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteAccount(${a.id},'${a.email}')">Hapus</button>
+    </td>
+  </tr>`).join('');
+}
+
+function loginBadge(s) {
+  if (!s || s === 'idle') return badge('Idle','gray');
+  if (s === 'running') return badge('Running...','blue');
+  if (s === 'queued') return badge('Queued','yellow');
+  if (s === 'success') return badge('OK','green');
+  if (s === 'failed') return badge('Gagal','red');
+  return badge(s.substring(0,30),'red');
+}
+
+async function addAccount() {
+  const email = document.getElementById('add-email').value;
+  const password = document.getElementById('add-pass').value;
+  const r = await fetch(API + '/admin/api/accounts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
+  if (r.ok) { toast('Akun ditambahkan'); closeModals(); loadAccounts(); loadStats(); }
+  else toast('Error: ' + (await r.json()).detail);
+}
+
+async function bulkImport() {
+  const data = document.getElementById('bulk-data').value;
+  const r = await fetch(API + '/admin/api/accounts/bulk', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({data}) });
+  const j = await r.json();
+  toast(`${j.added} akun diimport`);
+  closeModals();
+  loadAccounts(); loadStats();
+}
+
+async function checkAccount(id) {
+  toast('Mengecek cookie...');
+  const r = await fetch(API + `/admin/api/accounts/${id}/check`, {method:'POST'});
+  const j = await r.json();
+  toast(j.valid ? 'Cookie valid!' : 'Cookie invalid');
+  loadAccounts(); loadStats();
+}
+
+async function loginAccount(id) {
+  const r = await fetch(API + `/admin/api/accounts/${id}/login`, {method:'POST'});
+  toast('Login dimulai...');
+  startPoll();
+}
+
+async function deleteAccount(id, email) {
+  if (!confirm(`Hapus akun ${email}?`)) return;
+  await fetch(API + `/admin/api/accounts/${id}`, {method:'DELETE'});
+  toast('Akun dihapus');
+  loadAccounts(); loadStats();
+}
+
+async function checkAllAccounts() {
+  toast('Mengecek semua cookie...');
+  await fetch(API + '/admin/api/accounts/check-all', {method:'POST'});
+  toast('Selesai cek semua');
+  loadAccounts(); loadStats();
+}
+
+async function loginAllAccounts() {
+  const r = await fetch(API + '/admin/api/accounts/login-all', {method:'POST'});
+  const j = await r.json();
+  toast(`${j.queued} akun diqueue untuk login`);
+  startPoll();
+}
+
+function startPoll() {
+  if (pollTimer) return;
+  pollTimer = setInterval(() => loadAccounts(), 3000);
+  setTimeout(() => { clearInterval(pollTimer); pollTimer = null; }, 120000);
+}
+
+async function loadKeys() {
+  const keys = await fetch(API + '/admin/api/keys').then(r => r.json());
+  document.getElementById('key-table').innerHTML = keys.map(k => `<tr>
+    <td class="mono">${k.key}</td>
+    <td>${k.name}</td>
+    <td>${k.active ? badge('Aktif','green') : badge('Nonaktif','red')}</td>
+    <td>${k.request_count}</td>
+    <td style="color:var(--text2);font-size:12px">${k.created_at}</td>
+    <td><button class="btn btn-sm btn-danger" onclick="deleteKey(${k.id})">Hapus</button></td>
+  </tr>`).join('');
+}
+
+async function createKey() {
+  const name = document.getElementById('key-name').value || 'Unnamed';
+  const r = await fetch(API + '/admin/api/keys', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name}) });
+  const j = await r.json();
+  toast(`Key dibuat: ${j.key}`);
+  closeModals();
+  loadKeys();
+}
+
+async function deleteKey(id) {
+  if (!confirm('Hapus key ini?')) return;
+  await fetch(API + `/admin/api/keys/${id}`, {method:'DELETE'});
+  toast('Key dihapus');
+  loadKeys();
+}
+
+async function loadLogs() {
+  const logs = await fetch(API + '/admin/api/logs').then(r => r.json());
+  document.getElementById('log-table').innerHTML = logs.map(l => `<tr>
+    <td style="color:var(--text2);font-size:12px">${l.created_at}</td>
+    <td class="mono">${l.account_email}</td>
+    <td>${l.model}</td>
+    <td>${l.duration_ms}ms</td>
+    <td>${l.success ? badge('OK','green') : badge(l.error_msg?.substring(0,40)||'Error','red')}</td>
+  </tr>`).join('');
+}
+
+document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModals(); }));
+
+loadStats();
+</script>
+</body>
+</html>

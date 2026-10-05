@@ -1,0 +1,68 @@
+# ===============================================================
+#  SECRETS & ACCOUNT DATA — NEVER COMMIT
+#  (akun, cookie, password, token, session)
+# ===============================================================
+.admin_secret
+.env
+.env.*
+!.env.example
+accounts.json
+accounts.json.bak
+accounts*.json
+databaseakun*.txt
+*.txt.bak
+
+# login.har / all.har — berisi cookie & session hidup
+*.har
+
+# SQLite DB — berisi password akun & cookie
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# gambar hasil generate
+media/
+
+# Dokumen internal (berisi kredensial / catatan privat)
+handoff.md
+AUDIT.md
+
+# Sisa eksperimen JS lama di root (test-login.js ada kredensial) + junk
+/package.json
+/package-lock.json
+/node_modules
+test-login.js
+64664
+
+# ===============================================================
+#  Python
+# ===============================================================
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# ===============================================================
+#  Node / Next.js (admin-ui)
+# ===============================================================
+node_modules/
+admin-ui/.next/
+admin-ui/out/
+admin-ui/node_modules/
+admin-ui/*.tsbuildinfo
+admin-ui/AGENTS.md
+admin-ui/CLAUDE.md
+
+# ===============================================================
+#  OS / editor / tooling
+# ===============================================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
+*.log

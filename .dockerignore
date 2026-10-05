@@ -1,0 +1,33 @@
+# Keep the build context small and the image clean.
+# Runtime data is provided via volumes, not baked into the image.
+
+# Secrets & account data
+.admin_secret
+.env
+.env.local
+accounts.json
+accounts.json.bak
+databaseakun*.txt
+*.har
+
+# Runtime data
+*.db
+*.db-wal
+*.db-shm
+media/
+
+# Python
+**/__pycache__/
+*.pyc
+
+# Node / Next.js (rebuilt inside the image)
+**/node_modules/
+**/.next/
+admin-ui/out/
+
+# Git / OS / docs
+.git/
+.gitignore
+.DS_Store
+DEPLOY.md
+handoff.md

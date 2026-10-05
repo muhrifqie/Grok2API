@@ -1,0 +1,46 @@
+# Grok2API — two services built from the multi-stage Dockerfile.
+#
+# IMPORTANT (runtime data): the backend reads/writes grok2api.db, .admin_secret
+# and media/ at /app. They are bind-mounted below so data survives container
+# recreation. On a FRESH host, create them first so Docker mounts files (not dirs):
+#
+#   touch grok2api.db
+#   python3 -c "import secrets; open('.admin_secret','w').write(secrets.token_hex(32))"
+#   mkdir -p media
+#
+# (On the dev box these already exist, so `docker compose up` just works.)
+#
+# NOTE: the backend image bundles headless Firefox (Camoufox) and is large.
+# See the Dockerfile header and DEPLOY.md.
+
+services:
+  backend:
+    build:
+      context: .
+      target: backend
+    environment:
+      GROK2_ADMIN_PASS: ${GROK2_ADMIN_PASS:-change-me}
+    volumes:
+      - ./grok2api.db:/app/grok2api.db   # SQLite accounts/usage DB
+      - ./media:/app/media               # generated images
+      - ./.admin_secret:/app/.admin_secret # HMAC session key (keep stable)
+    expose:
+      - "8168"
+    # Backend stays internal (admin-ui reaches it over the compose network).
+    # Uncomment only to debug directly, and keep it bound to localhost:
+    # ports:
+    #   - "127.0.0.1:8168:8168"
+    restart: unless-stopped
+
+  admin-ui:
+    build:
+      context: .
+      target: admin-ui
+    environment:
+      BACKEND_URL: http://backend:8168   # compose service DNS name
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped

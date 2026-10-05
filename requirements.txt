@@ -1,0 +1,14 @@
+# Grok2API backend dependencies.
+# Pinned to the versions detected on the dev box on 2026-10-04 (Python 3.14.3).
+# All of these also install cleanly on Python 3.11/3.12 (the recommended server runtime).
+
+# --- Core API server (server.py) ---
+fastapi==0.141.1
+uvicorn[standard]==0.53.0        # [standard] adds uvloop/httptools/websockets/watchfiles on Linux
+httpx==0.28.1
+websockets==13.1                 # server imports websockets.asyncio.client (needs >=13)
+
+# --- Account login automation (login_camoufox.py) ---
+# Drives a real anti-detect Firefox. The browser binary is NOT on PyPI; download it
+# after install with:  python -m camoufox fetch   (see DEPLOY.md for the system libs it needs).
+camoufox==0.5.6
